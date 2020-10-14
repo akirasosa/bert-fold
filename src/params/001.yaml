@@ -2,7 +2,6 @@ note: 'Default training for Titan RTX'
 seed: 1
 
 module_params:
-  optim: radam
   lr: 1e-5
   weight_decay: 0.
 

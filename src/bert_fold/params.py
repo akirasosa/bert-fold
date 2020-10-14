@@ -13,7 +13,6 @@ class DataParams(ParamsMixIn):
 
 @dataclasses.dataclass(frozen=True)
 class ModuleParams(ParamsMixIn):
-    optim: str = 'radam'
     lr: float = 1e-5
     weight_decay: float = 0.
 

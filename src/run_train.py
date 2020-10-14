@@ -10,10 +10,12 @@ import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import torch
+from apex.optimizers import FusedAdam
 from omegaconf import DictConfig
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
+from torch.optim.lr_scheduler import OneCycleLR
 from torch.utils.data import DataLoader, Dataset
 from torch_optimizer import RAdam
 
@@ -124,8 +126,8 @@ class StepResult(TypedDict):
 
 
 def calc_weighted_mean(items: Sequence[Tuple[float, float]]) -> float:
-    items_ = np.array(items)
-    values, weights = items_[:, 0], items_[:, 1]
+    items = np.array(items)
+    values, weights = items[:, 0], items[:, 1]
     result = (values * weights).sum() / weights.sum()
     return result
 
@@ -141,13 +143,21 @@ class PLModule(PLBaseModule[BertFold]):
             self.ema_model = create_ema(self.model)
 
     def configure_optimizers(self):
-        opt = RAdam(
+        opt = FusedAdam(
             self.model.parameters(),
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
         )
+        sched = {
+            'scheduler': OneCycleLR(
+                opt,
+                max_lr=self.hp.lr,
+                total_steps=self.total_steps,
+            ),
+            'interval': 'step',
+        }
 
-        return [opt]
+        return [opt], [sched]
 
     def step(self, model: BertFold, batch: ProteinNetBatch) -> StepResult:
         targets = prepare_targets(batch)
