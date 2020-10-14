@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import Callable, Optional, Tuple, Protocol, Sequence, Mapping, Generic, TypeVar, TypedDict, Dict, Any
+from typing import Callable, Optional, Tuple, Protocol, Sequence, Mapping, Generic, TypeVar, TypedDict, Dict, Any, \
+    Union
 
 import pytorch_lightning as pl
 import torch
@@ -9,6 +10,7 @@ from pytorch_ranger import Ranger
 from torch.optim import SGD
 from torch.optim.lr_scheduler import OneCycleLR, LambdaLR
 from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torch_optimizer import RAdam
 
@@ -65,7 +67,7 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
 
         return result
 
-    def validation_step(self, batch, batch_idx, dataloader_idx):
+    def validation_step(self, batch, batch_idx, *args, **kwargs):
         result = self.step(self.model, batch)
 
         if self.eval_ema:
@@ -89,7 +91,11 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
 
         return {}
 
-    def validation_epoch_end(self, outputs_list: Sequence[Sequence[ValStepResult]]):
+    def validation_epoch_end(self, outputs_list: Union[Sequence[StepResult], Sequence[Sequence[ValStepResult]]]):
+        # Ensure that val loader is a list.
+        if isinstance(self.val_dataloader(), DataLoader):
+            outputs_list = [outputs_list]
+
         result: Dict[str, Any] = {}
 
         for idx, outputs in enumerate(outputs_list):
@@ -128,48 +134,17 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
         if self.global_step > 0:
             for k, v in metrics.items():
                 if k == 'lr':
-                    self.tb_logger.add_scalar('lr', metrics['lr'], self.current_epoch)
+                    self.tb_logger.add_scalars('lr', {
+                        'lr': metrics['lr'],
+                    }, self.n_processed)
                 else:
                     self.tb_logger.add_scalars(k, {
                         prefix: v,
                     }, self.n_processed)
 
+    @abstractmethod
     def configure_optimizers(self):
-        if self.hp.optim == 'sgd':
-            opt = SGD(
-                self.model.parameters(),
-                lr=self.hp.lr,
-                momentum=0.9,
-                nesterov=True,
-            )
-            sched = {
-                'scheduler': OneCycleLR(
-                    opt,
-                    max_lr=self.hp.lr,
-                    total_steps=self.total_steps),
-                'interval': 'step',
-            }
-            return [opt], [sched]
-
-        if self.hp.optim == 'ranger':
-            optim = Ranger
-        elif self.hp.optim == 'radam':
-            optim = RAdam
-        else:
-            raise Exception(f'Not supported optim: {self.hp.optim}')
-        opt = optim(
-            self.model.parameters(),
-            lr=self.hp.lr,
-            weight_decay=self.hp.weight_decay,
-        )
-        sched = {
-            'scheduler': LambdaLR(
-                opt,
-                lr_lambda=flat_cos(self.total_steps),
-            ),
-            'interval': 'step',
-        }
-        return [opt], [sched]
+        pass
 
     @property
     def steps_per_epoch(self) -> int:
