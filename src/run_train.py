@@ -21,7 +21,7 @@ from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
-from protein.datasets.contact_prediction_dataset import ProteinNetDataset, prepare_targets
+from protein.dataset import ProteinNetDataset, prepare_targets
 from protein.dto.batch import ProteinNetBatch
 from protein.modules.bert_fold import BertFold
 from protein.params import ModuleParams, DataParams, Params
@@ -139,18 +139,6 @@ class PLModule(PLBaseModule[BertFold]):
 
         if self.hp.use_ema:
             self.ema_model = create_ema(self.model)
-
-    # def on_epoch_start(self) -> None:
-    #     if self.current_epoch == 0:
-    #         for k, v in self.model.named_parameters():
-    #             if k.startswith('transformer.cls.predictions.decoder'):
-    #                 v.requires_grad = True
-    #             else:
-    #                 v.requires_grad = False
-    #
-    #     if self.current_epoch == 1:
-    #         for k, v in self.model.named_parameters():
-    #             v.requires_grad = True
 
     def configure_optimizers(self):
         opt = RAdam(

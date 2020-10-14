@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 
 from const import DATA_PROTEIN_NET_DIR
-from protein.datasets.contact_prediction_dataset import ProteinNetDataset, prepare_targets
+from protein.dataset import ProteinNetDataset, prepare_targets
 from protein.metrics import TopLNPrecision
 from protein.modules.bert_fold import BertFold
 

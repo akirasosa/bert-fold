@@ -113,7 +113,7 @@ class BertFold(nn.Module):
 if __name__ == '__main__':
     # %%
     from torch.utils.data import DataLoader
-    from protein.datasets.contact_prediction_dataset import ProteinNetDataset, prepare_targets
+    from protein.dataset import ProteinNetDataset, prepare_targets
     from protein.dto.batch import ProteinNetBatch
     from const import DATA_PROTEIN_NET_DIR
     import pandas as pd

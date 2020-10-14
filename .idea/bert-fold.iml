@@ -7,4 +7,7 @@
     <orderEntry type="jdk" jdkName="Remote Python 3.8.5 (sftp://akirasosa@vfa-blue:22/home/akirasosa/local/anaconda3/envs/dti-research/bin/python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PyDocumentationSettings">
+    <option name="renderExternalDocumentation" value="true" />
+  </component>
 </module>

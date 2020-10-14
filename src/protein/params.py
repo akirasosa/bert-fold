@@ -15,7 +15,6 @@ class DataParams(ParamsMixIn):
 class ModuleParams(ParamsMixIn):
     optim: str = 'radam'
     lr: float = 1e-5
-    lr_bert: float = 3e-6
     weight_decay: float = 0.
 
     ema_decay: Optional[float] = None
