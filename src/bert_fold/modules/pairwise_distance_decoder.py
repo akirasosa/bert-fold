@@ -3,8 +3,8 @@ from typing import Optional
 import torch
 import torch.nn as nn
 
-from protein.dto.outputs import DecoderOutput
-from protein.dto.targets import PairwiseTargets
+from bert_fold.dto.outputs import DecoderOutput
+from bert_fold.dto.targets import PairwiseTargets
 
 
 # noinspection PyAbstractClass

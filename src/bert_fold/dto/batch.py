@@ -2,7 +2,7 @@ from typing import TypedDict
 
 import torch
 
-from protein.dto import Indices2D, Indices3D
+from bert_fold.dto import Indices2D, Indices3D
 
 
 class ProteinNetBatch(TypedDict):

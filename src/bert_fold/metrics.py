@@ -4,7 +4,7 @@ import torch
 from torch_scatter import scatter_mean
 
 from mylib.torch.nn.functional import scatter_sort
-from protein.dto import Indices3D
+from bert_fold.dto import Indices3D
 
 
 @dataclass

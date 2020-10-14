@@ -6,9 +6,9 @@ import pandas as pd
 import torch
 
 from const import DATA_PROTEIN_NET_DIR
-from protein.dataset import ProteinNetDataset, prepare_targets
-from protein.metrics import TopLNPrecision
-from protein.modules.bert_fold import BertFold
+from bert_fold.dataset import ProteinNetDataset, prepare_targets
+from bert_fold.metrics import TopLNPrecision
+from bert_fold.modules.bert_fold import BertFold
 
 
 def load_model() -> BertFold:

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="akirasosa@vfa-ruby:22 agent" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="akirasosa@vfa-blue:22 agent">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/mnt/lvstuff/akirasosa/ghq/github.com/akirasosa/bert-fold/src" local="$PROJECT_DIR$/src" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="akirasosa@vfa-ruby:22 agent">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/mnt/nfs/vfa-blue/akirasosa/ghq/github.com/akirasosa/bert-fold/src" local="$PROJECT_DIR$/src" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>

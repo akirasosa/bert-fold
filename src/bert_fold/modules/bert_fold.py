@@ -4,10 +4,10 @@ import torch
 import torch.nn as nn
 from transformers import BertModel, BertConfig
 
-from protein.dto.outputs import BertFoldOutput
-from protein.dto.targets import BertFoldTargets
-from protein.metrics import MAEForSeq
-from protein.modules.pairwise_distance_decoder import PairwiseDistanceDecoder
+from bert_fold.dto.outputs import BertFoldOutput
+from bert_fold.dto.targets import BertFoldTargets
+from bert_fold.metrics import MAEForSeq
+from bert_fold.modules.pairwise_distance_decoder import PairwiseDistanceDecoder
 
 
 def init_weights(module: nn.Module):
@@ -113,8 +113,8 @@ class BertFold(nn.Module):
 if __name__ == '__main__':
     # %%
     from torch.utils.data import DataLoader
-    from protein.dataset import ProteinNetDataset, prepare_targets
-    from protein.dto.batch import ProteinNetBatch
+    from bert_fold.dataset import ProteinNetDataset, prepare_targets
+    from bert_fold.dto.batch import ProteinNetBatch
     from const import DATA_PROTEIN_NET_DIR
     import pandas as pd
 

@@ -17,15 +17,15 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader, Dataset
 from torch_optimizer import RAdam
 
+from bert_fold.dataset import ProteinNetDataset, prepare_targets
+from bert_fold.dto.batch import ProteinNetBatch
+from bert_fold.modules.bert_fold import BertFold
+from bert_fold.params import ModuleParams, DataParams, Params
+from bert_fold.tokenizers import ProtBertTokenizer
 from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
-from protein.dataset import ProteinNetDataset, prepare_targets
-from protein.dto.batch import ProteinNetBatch
-from protein.modules.bert_fold import BertFold
-from protein.params import ModuleParams, DataParams, Params
-from protein.tokenizers import ProtBertTokenizer
 
 
 def load_bert_fold(params: ModuleParams) -> BertFold:

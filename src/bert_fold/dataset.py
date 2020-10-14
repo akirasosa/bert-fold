@@ -8,10 +8,10 @@ from torch.utils.data import Dataset, DataLoader
 
 from mylib.torch.data.dataset import PandasDataset
 from mylib.torch.functional import calculate_distances
-from protein.dto import Indices3D
-from protein.dto.batch import ProteinNetBatch
-from protein.dto.targets import BertFoldTargets, Targets, PairwiseTargets
-from protein.tokenizers import ProtBertTokenizer
+from bert_fold.dto import Indices3D
+from bert_fold.dto.batch import ProteinNetBatch
+from bert_fold.dto.targets import BertFoldTargets, Targets, PairwiseTargets
+from bert_fold.tokenizers import ProtBertTokenizer
 
 
 # %%
