@@ -17,7 +17,6 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.utils.data import DataLoader, Dataset
-from torch_optimizer import RAdam
 
 from bert_fold.dataset import ProteinNetDataset, prepare_targets
 from bert_fold.dto.batch import ProteinNetBatch
@@ -197,7 +196,7 @@ def train(params: Params):
 
     tb_logger = TensorBoardLogger(
         params.t.save_dir,
-        name='protein_supervised',
+        name='bert_fold',
         version=experiment_id,
     )
 
