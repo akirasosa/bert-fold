@@ -89,8 +89,6 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
         }
         self.__log(metrics, prefix='train')
 
-        return {}
-
     def validation_epoch_end(self, outputs_list: Union[Sequence[StepResult], Sequence[Sequence[ValStepResult]]]):
         # Ensure that val loader is a list.
         if isinstance(self.val_dataloader(), DataLoader):
