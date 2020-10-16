@@ -17,6 +17,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.utils.data import DataLoader, Dataset
+from torch_optimizer import RAdam
 
 from bert_fold.dataset import ProteinNetDataset, prepare_targets
 from bert_fold.dto.batch import ProteinNetBatch
@@ -142,21 +143,13 @@ class PLModule(PLBaseModule[BertFold]):
             self.ema_model = create_ema(self.model)
 
     def configure_optimizers(self):
-        opt = FusedAdam(
+        opt = RAdam(
             self.model.parameters(),
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
         )
-        sched = {
-            'scheduler': OneCycleLR(
-                opt,
-                max_lr=self.hp.lr,
-                total_steps=self.total_steps,
-            ),
-            'interval': 'step',
-        }
 
-        return [opt], [sched]
+        return [opt]
 
     def step(self, model: BertFold, batch: ProteinNetBatch) -> StepResult:
         targets = prepare_targets(batch)
@@ -233,7 +226,7 @@ def train(params: Params):
         terminate_on_nan=True,
         deterministic=True,
         benchmark=True,
-        # val_check_interval=1 / 3,
+        val_check_interval=1 / 3,
     )
     dm = DataModule(params.d)
     net = PLModule(params.m.dict_config())
