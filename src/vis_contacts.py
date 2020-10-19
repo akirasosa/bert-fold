@@ -5,19 +5,14 @@ import numpy as np
 import pandas as pd
 import torch
 
-from const import DATA_PROTEIN_NET_DIR
 from bert_fold.dataset import ProteinNetDataset, prepare_targets
-from bert_fold.metrics import TopLNPrecision
 from bert_fold.modules.bert_fold import BertFold
+from const import DATA_PROTEIN_NET_DIR
 
 
 def load_model() -> BertFold:
     model = BertFold(pretrained=False)
-    # ckpt = torch.load('../experiments/protein_supervised/1599204762/checkpoints/epoch=3.ckpt')
-    # ckpt = torch.load('../experiments/protein_supervised/1599314906/checkpoints/epoch=2.ckpt')
-    # ckpt = torch.load('../experiments/protein_supervised/1599361803/checkpoints/last.ckpt')
-    # ckpt = torch.load('../experiments/protein_supervised/1599468106/checkpoints/last.ckpt')
-    # ckpt = torch.load('../experiments/protein_supervised/1599530879/checkpoints/epoch=4.ckpt')
+    # Update here for your trained weight.
     ckpt = torch.load('../experiments/protein_supervised/1599530879/checkpoints/last.ckpt')
 
     if any(k.startswith('ema_model') for k in ckpt['state_dict'].keys()):
@@ -48,16 +43,7 @@ if __name__ == '__main__':
     model = load_model().eval().cpu()
 
     # %%
-    # df[df['id'].str.contains('1O6D')]
-    # df[df['id'].str.contains('1QFT')]
-    # df[df['id'].str.contains('3HPW')]
-    # df[df['id'].str.contains('1GVN')]
-    df[df['id'].str.contains('4WBD')]
-
-    # %%
-    # data = dataset[np.random.randint(len(dataset))]
-    data = dataset[119]
-    # data2 = dataset[np.random.randint(len(dataset))]
+    data = dataset[np.random.randint(len(dataset))]
     batch = ProteinNetDataset.collate([data])
     targets = prepare_targets(batch)
 
@@ -71,7 +57,6 @@ if __name__ == '__main__':
     seq_len = len(data[0]) - 2
     _, idx_i, idx_j = targets.dist.indices
     y_true = targets.dist.values.numpy()
-    # y_hat = out.y_hat[0][targets.dist.indices].numpy()
     y_hat = out.y_hat[0][0].numpy()
 
     mat_true = np.full((seq_len, seq_len), np.nan)
@@ -89,16 +74,3 @@ if __name__ == '__main__':
     plt.show()
 
     print(out.mae_l_8)
-    # print(out.top_l5_precision)
-
-    # %%
-    y_hat = out.y_hat[0][targets.dist.indices]
-    y = targets.dist.values
-    seq_lens = batch['attention_mask'].sum(-1) - 2
-
-    TopLNPrecision(n=5)(
-        y_hat,
-        y,
-        targets.dist.indices,
-        seq_lens
-    )
