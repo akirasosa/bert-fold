@@ -1,6 +1,6 @@
 # BertFold
 
-BertFold is a 16 layers BERT model to predict the distance map of protein 3D structure. ProtBert is used as a pre-trained model.
+BertFold is a 16 layers BERT model to predict the distance map of protein 3D structure. [ProtBert](https://huggingface.co/Rostlab/prot_bert) is used as a pre-trained model.
 
 More details are in my [article](https://medium.com/vitalify-asia/bert-meets-the-protein-3d-structure-44f869b15c06).
 
@@ -27,3 +27,8 @@ python run_train.py params/001.yaml
 Once finishing train the model, predicted distance map is available by using the [visualization script](./src/vis_contacts.py)
 
 ![1ZU4](images/1ZU4.jpg)
+
+## Credits
+
+* [ProtTrans](https://github.com/agemagician/ProtTrans)
+* [ProteinNet](https://github.com/aqlaboratory/proteinnet)
