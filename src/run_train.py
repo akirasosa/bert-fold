@@ -151,6 +151,7 @@ class PLModule(PLBaseModule[BertFold]):
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
             eps=1e-8,
+            rectify=True,
         )
 
         return [opt]
