@@ -150,6 +150,7 @@ class PLModule(PLBaseModule[BertFold]):
             self.model.parameters(),
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
+            eps=1e-8,
         )
 
         return [opt]
