@@ -16,7 +16,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, Dataset
-from torch_optimizer import RAdam
+from torch_optimizer import RAdam, AdaBelief
 
 from bert_fold.dataset import ProteinNetDataset, prepare_targets
 from bert_fold.dto.batch import ProteinNetBatch
@@ -27,7 +27,6 @@ from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
-from mylib.torch.optim.AdaBelief import AdaBelief
 from mylib.torch.optim.sched import flat_cos
 
 
