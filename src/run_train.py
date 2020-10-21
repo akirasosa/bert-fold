@@ -27,6 +27,7 @@ from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
+from mylib.torch.optim.AdaBelief import AdaBelief
 from mylib.torch.optim.sched import flat_cos
 
 
@@ -146,24 +147,13 @@ class PLModule(PLBaseModule[BertFold]):
             self.ema_model = create_ema(self.model)
 
     def configure_optimizers(self):
-        opt = RAdam(
+        opt = AdaBelief(
             self.model.parameters(),
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
         )
-        # noinspection PyTypeChecker
-        sched = {
-            'scheduler': LambdaLR(
-                opt,
-                lr_lambda=partial(
-                    flat_cos,
-                    total_steps=self.total_steps,
-                ),
-            ),
-            'interval': 'step',
-        }
 
-        return [opt], [sched]
+        return [opt]
 
     def step(self, model: BertFold, batch: ProteinNetBatch) -> StepResult:
         targets = prepare_targets(batch)
