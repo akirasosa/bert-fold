@@ -6,22 +6,14 @@ from typing import Callable, Optional, Tuple, Protocol, Sequence, Mapping, Gener
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from pytorch_ranger import Ranger
-from torch.optim import SGD
-from torch.optim.lr_scheduler import OneCycleLR, LambdaLR
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from torch_optimizer import RAdam
 
 from mylib.torch.ensemble.ema import update_ema
-from mylib.torch.optim.sched import flat_cos
 
 
 class ModuleParams(Protocol):
-    optim: str
-    lr: float
-    weight_decay: float
     ema_decay: Optional[float]
     ema_eval_freq: int
 
@@ -113,10 +105,10 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
                     **result,
                     f'ema_{idx}_loss': metrics_ema['loss'],
                 }
+        self.log_dict(result)
 
-        return result
-
-    def collect_metrics(self, outputs: Sequence[StepResult]) -> Mapping:
+    @staticmethod
+    def collect_metrics(outputs: Sequence[StepResult]) -> Mapping:
         loss = 0.
         total = 0
         for x in outputs:
@@ -129,20 +121,18 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
         }
 
     def __log(self, metrics: Mapping, prefix: str):
-        if self.global_step > 0:
-            for k, v in metrics.items():
-                if k == 'lr':
-                    self.tb_logger.add_scalars('lr', {
-                        'lr': metrics['lr'],
-                    }, self.n_processed)
-                else:
-                    self.tb_logger.add_scalars(k, {
-                        prefix: v,
-                    }, self.n_processed)
+        if self.n_processed == 0:
+            return
 
-    @abstractmethod
-    def configure_optimizers(self):
-        pass
+        for k, v in metrics.items():
+            if k == 'lr':
+                self.tb_logger.add_scalars('lr', {
+                    'lr': metrics['lr'],
+                }, self.n_processed)
+            else:
+                self.tb_logger.add_scalars(k, {
+                    prefix: v,
+                }, self.n_processed)
 
     @property
     def steps_per_epoch(self) -> int:
@@ -176,3 +166,7 @@ class PLBaseModule(pl.LightningModule, ABC, Generic[T]):
     @property
     def logger_(self) -> Logger:
         return getLogger('lightning')
+
+    @property
+    def is_half(self) -> bool:
+        return self.trainer.amp_level == 'O2'

@@ -26,12 +26,19 @@ def init_weights(module: nn.Module):
 
 # noinspection PyAbstractClass
 class BertFold(nn.Module):
-    def __init__(self, pretrained: bool = True):
+    def __init__(
+            self,
+            pretrained: bool = True,
+            gradient_checkpointing: bool = False,
+    ):
         super().__init__()
         if pretrained:
-            self.bert = BertModel.from_pretrained('Rostlab/prot_bert')
+            self.bert = BertModel.from_pretrained(
+                'Rostlab/prot_bert_bfd',
+                gradient_checkpointing=gradient_checkpointing,
+            )
         else:
-            conf = BertConfig.from_pretrained('Rostlab/prot_bert')
+            conf = BertConfig.from_pretrained('Rostlab/prot_bert_bfd')
             self.bert = BertModel(conf)
 
         # noinspection PyUnresolvedReferences
@@ -128,7 +135,7 @@ if __name__ == '__main__':
         shuffle=False
     )
     # %%
-    model = BertFold(pretrained=False)
+    model = BertFold(pretrained=True, gradient_checkpointing=True)
 
     # %%
     batch: ProteinNetBatch = next(iter(loader))

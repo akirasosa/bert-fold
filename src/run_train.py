@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from functools import cached_property
+from functools import cached_property, partial
 from logging import getLogger, FileHandler
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -10,12 +10,11 @@ import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import torch
-from apex.optimizers import FusedAdam
 from omegaconf import DictConfig
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch.optim.lr_scheduler import OneCycleLR
+from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, Dataset
 from torch_optimizer import RAdam
 
@@ -28,11 +27,15 @@ from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
+from mylib.torch.optim.sched import flat_cos
 
 
 def load_bert_fold(params: ModuleParams) -> BertFold:
     if params.pretrained_ckpt_path is None:
-        return BertFold(pretrained=True)
+        return BertFold(
+            pretrained=True,
+            gradient_checkpointing=params.gradient_checkpointing,
+        )
 
     model = BertFold(pretrained=False)
     ckpt = torch.load(params.pretrained_ckpt_path)
@@ -148,8 +151,19 @@ class PLModule(PLBaseModule[BertFold]):
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
         )
+        # noinspection PyTypeChecker
+        sched = {
+            'scheduler': LambdaLR(
+                opt,
+                lr_lambda=partial(
+                    flat_cos,
+                    total_steps=self.total_steps,
+                ),
+            ),
+            'interval': 'step',
+        }
 
-        return [opt]
+        return [opt], [sched]
 
     def step(self, model: BertFold, batch: ProteinNetBatch) -> StepResult:
         targets = prepare_targets(batch)

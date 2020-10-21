@@ -19,6 +19,8 @@ class ModuleParams(ParamsMixIn):
     ema_decay: Optional[float] = None
     ema_eval_freq: int = 1
 
+    gradient_checkpointing: bool = False
+
     pretrained_ckpt_path: Optional[str] = None
 
     @property
