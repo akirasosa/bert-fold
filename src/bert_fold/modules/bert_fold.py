@@ -8,6 +8,7 @@ from bert_fold.dto.outputs import BertFoldOutput
 from bert_fold.dto.targets import BertFoldTargets
 from bert_fold.metrics import MAEForSeq
 from bert_fold.modules.pairwise_distance_decoder import PairwiseDistanceDecoder
+from bert_fold.dto.batch import ProteinNetBatch
 
 
 def init_weights(module: nn.Module):
@@ -44,7 +45,7 @@ class BertFold(nn.Module):
         # noinspection PyUnresolvedReferences
         dim = self.bert.config.hidden_size
 
-        self.decoder_dist = PairwiseDistanceDecoder(dim)
+        self.decoder_dist = PairwiseDistanceDecoder(dim + 21)
         # self.decoder_phi = ElementwiseAngleDecoder(dim, 2)
         # self.decoder_psi = ElementwiseAngleDecoder(dim, 2)
 
@@ -54,11 +55,21 @@ class BertFold(nn.Module):
 
     def forward(
             self,
-            input_ids,
-            attention_mask=None,
+            # input_ids,
+            # attention_mask=None,
+            inputs: ProteinNetBatch,
             targets: Optional[BertFoldTargets] = None,
     ) -> BertFoldOutput:
-        x = self.bert.forward(input_ids, attention_mask=attention_mask)[0]
+        x = self.bert.forward(
+            inputs['input_ids'],
+            attention_mask=inputs['attention_mask'],
+        )[0]
+        x = torch.cat((
+            x,
+            inputs['evo'].type_as(x),
+        ), dim=-1)
+        # print(x.shape)
+        # print(inputs['evo'].shape)
 
         targets_dist = None if targets is None else targets.dist
         # targets_phi = None if targets is None else targets.phi
@@ -140,7 +151,7 @@ if __name__ == '__main__':
     # %%
     batch: ProteinNetBatch = next(iter(loader))
     targets = prepare_targets(batch)
-    out = model.forward(batch['input_ids'], batch['attention_mask'], targets=targets)
+    out = model.forward(batch, targets=targets)
     pass
 
     # %%

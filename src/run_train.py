@@ -146,18 +146,17 @@ class PLModule(PLBaseModule[BertFold]):
             self.ema_model = create_ema(self.model)
 
     def configure_optimizers(self):
-        opt = AdaBelief(
+        opt = RAdam(
             self.model.parameters(),
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
-            eps=1e-8,
         )
 
         return [opt]
 
     def step(self, model: BertFold, batch: ProteinNetBatch) -> StepResult:
         targets = prepare_targets(batch)
-        out = model.forward(batch['input_ids'], batch['attention_mask'], targets=targets)
+        out = model.forward(batch, targets=targets)
         result = StepResult(n_processed=len(batch['input_ids']), **{
             k: v for k, v in out.items()
             if not k == 'y_hat'

@@ -1,6 +1,7 @@
 import concurrent
 import re
 from concurrent.futures.process import ProcessPoolExecutor
+from os import cpu_count
 from pathlib import Path
 
 import numpy as np
@@ -154,8 +155,8 @@ def process_file(input_file: Path, handle_missing=False):
                 'tertiary_ca': tertiary[:, :, 1].T.reshape(-1),
                 'tertiary_cb': tertiary[:, :, 2].T.reshape(-1),
                 'valid_mask': np.array(next_protein['mask']).reshape(-1),
+                'evolutionary': np.array(next_protein['evolutionary']).reshape(-1),
             }
-            del result['evolutionary']
             del result['tertiary']
             del result['mask']
             results.append(result)
@@ -170,12 +171,12 @@ def process_file(input_file: Path, handle_missing=False):
 # %%
 if __name__ == '__main__':
     # %%
-    base_path = DATA_PROTEIN_NET_DIR / 'casp12'
+    base_path = Path('/mnt/nfs/vfa-red/akirasosa/data/ProteinNet/casp12')
     files = list(filter(lambda x: not str(x).endswith('pqt'), base_path.glob('*')))
     files = sorted(files)
 
     # %%
-    executor = ProcessPoolExecutor(max_workers=10)
+    executor = ProcessPoolExecutor(max_workers=cpu_count())
     jobs = [executor.submit(process_file, f) for f in files]
     for job in tqdm(concurrent.futures.as_completed(jobs), total=len(jobs)):
         job.result()

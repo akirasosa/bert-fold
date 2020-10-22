@@ -6,12 +6,12 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset, DataLoader
 
-from mylib.torch.data.dataset import PandasDataset
-from mylib.torch.functional import calculate_distances
 from bert_fold.dto import Indices3D
 from bert_fold.dto.batch import ProteinNetBatch
 from bert_fold.dto.targets import BertFoldTargets, Targets, PairwiseTargets
 from bert_fold.tokenizers import ProtBertTokenizer
+from mylib.torch.data.dataset import PandasDataset
+from mylib.torch.functional import calculate_distances
 
 
 # %%
@@ -48,16 +48,21 @@ class ProteinNetDataset(Dataset):
         pair_mask &= np.abs(idx_0 - idx_1) >= 6
         pair_indices = (idx_0[pair_mask], idx_1[pair_mask])
 
-        return input_ids, attention_mask, R, seq_indices, phi, psi, pair_indices, item['id']
+        evo = item['evolutionary'].reshape(21, -1).transpose()
+        evo = np.pad(evo, ((1, 1), (0, 0)))
+        evo = torch.from_numpy(evo)
+
+        return input_ids, attention_mask, R, seq_indices, phi, psi, pair_indices, evo, item['id']
 
     @staticmethod
     def collate(batch: List[Any]) -> ProteinNetBatch:
-        input_ids, attention_mask, R, seq_indices, phi, psi, pair_indices, _ = tuple(zip(*batch))
+        input_ids, attention_mask, R, seq_indices, phi, psi, pair_indices, evo, _ = tuple(zip(*batch))
 
         input_ids = pad_sequence(input_ids, batch_first=True)
         attention_mask = pad_sequence(attention_mask, batch_first=True)
         # B, N, 3 (xyz)
         R = pad_sequence(R, batch_first=True)
+        evo = pad_sequence(evo, batch_first=True)
 
         seq_batch = np.concatenate([np.full(len(x), n) for n, x in enumerate(seq_indices)])
         seq_indices = np.concatenate(seq_indices)
@@ -86,6 +91,7 @@ class ProteinNetDataset(Dataset):
             'psi': psi,
             'seq_indices': seq_indices,
             'pair_indices': pair_indices,
+            'evo': evo,
         }
 
 
@@ -156,3 +162,6 @@ if __name__ == '__main__':
     plt.hist(np.log(targets.dist.values[mask].numpy().reshape(-1)), bins=100)
     plt.show()
 
+    # %%
+    print(batch['evo'].shape)
+    print(batch['input_ids'].shape)

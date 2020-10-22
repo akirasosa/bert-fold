@@ -13,3 +13,4 @@ class ProteinNetBatch(TypedDict):
     psi: torch.FloatTensor
     seq_indices: Indices2D
     pair_indices: Indices3D
+    evo: torch.FloatTensor

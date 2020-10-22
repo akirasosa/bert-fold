@@ -8,7 +8,7 @@ class ProtBertTokenizer:
     def __init__(self):
         super().__init__()
         self._tokenizer = BertTokenizer.from_pretrained(
-            'Rostlab/prot_bert',
+            'Rostlab/prot_bert_bfd',
             do_lower_case=False,
         )
 
