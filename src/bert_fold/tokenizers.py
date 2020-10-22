@@ -1,13 +1,13 @@
 import re
 from typing import Sequence
 
-from transformers import BertTokenizer
+from transformers import BertTokenizerFast
 
 
 class ProtBertTokenizer:
     def __init__(self):
         super().__init__()
-        self._tokenizer = BertTokenizer.from_pretrained(
+        self._tokenizer = BertTokenizerFast.from_pretrained(
             'Rostlab/prot_bert_bfd',
             do_lower_case=False,
         )
