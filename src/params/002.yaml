@@ -4,12 +4,13 @@ seed: 1
 module_params:
   lr: 1e-5
   weight_decay: 0.
+  gradient_checkpointing: true
 
 trainer_params:
   epochs: 25
   gpus: -1
-  amp_level: 'O2'
-  accumulate_grad_batches: 3
+#  amp_level: 'O2'
+#  accumulate_grad_batches: 3
 
 data_params:
-  batch_size: 4
+  batch_size: 12
