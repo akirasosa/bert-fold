@@ -45,31 +45,40 @@ class BertFold(nn.Module):
         # noinspection PyUnresolvedReferences
         dim = self.bert.config.hidden_size
 
-        self.decoder_dist = PairwiseDistanceDecoder(dim + 21)
+        self.evo_linear = nn.Linear(21, dim)
+
+        self.decoder_dist = PairwiseDistanceDecoder(dim)
         # self.decoder_phi = ElementwiseAngleDecoder(dim, 2)
         # self.decoder_psi = ElementwiseAngleDecoder(dim, 2)
 
+        self.evo_linear.apply(init_weights)
         self.decoder_dist.apply(init_weights)
         # self.decoder_phi.apply(init_weights)
         # self.decoder_psi.apply(init_weights)
 
     def forward(
             self,
-            # input_ids,
-            # attention_mask=None,
             inputs: ProteinNetBatch,
             targets: Optional[BertFoldTargets] = None,
     ) -> BertFoldOutput:
-        x = self.bert.forward(
-            inputs['input_ids'],
-            attention_mask=inputs['attention_mask'],
-        )[0]
-        x = torch.cat((
-            x,
-            inputs['evo'].type_as(x),
-        ), dim=-1)
-        # print(x.shape)
-        # print(inputs['evo'].shape)
+        x_emb = self.bert.embeddings(inputs['input_ids'])
+        x_evo = self.evo_linear(inputs['evo'].type_as(x_emb))
+        x = x_emb + x_evo
+        extended_attention_mask: torch.Tensor = self.bert.get_extended_attention_mask(
+            inputs['attention_mask'],
+            inputs['input_ids'].shape,
+            inputs['input_ids'].device,
+        )
+        x = self.bert.encoder.forward(x, attention_mask=extended_attention_mask)[0]
+
+        # x = self.bert.forward(
+        #     inputs['input_ids'],
+        #     attention_mask=inputs['attention_mask'],
+        # )[0]
+        # x = torch.cat((
+        #     x,
+        #     inputs['evo'].type_as(x),
+        # ), dim=-1)
 
         targets_dist = None if targets is None else targets.dist
         # targets_phi = None if targets is None else targets.phi
