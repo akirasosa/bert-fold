@@ -146,7 +146,7 @@ if __name__ == '__main__':
         shuffle=False
     )
     # %%
-    model = BertFold(pretrained=True, gradient_checkpointing=True)
+    model = BertFold(pretrained=False)
 
     # %%
     batch: ProteinNetBatch = next(iter(loader))

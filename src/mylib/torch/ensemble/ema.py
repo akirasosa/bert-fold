@@ -10,8 +10,7 @@ T = TypeVar('T', bound=nn.Module)
 def create_ema(src_model: T) -> T:
     ema_model = copy.deepcopy(src_model).eval()
     for p in ema_model.parameters():
-        # p.requires_grad_(False)
-        p.grad = None
+        p.requires_grad_(False)
     return ema_model
 
 
