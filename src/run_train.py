@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from functools import cached_property
+from functools import cached_property, partial
 from logging import getLogger, FileHandler
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -10,13 +10,13 @@ import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import torch
-from apex.optimizers import FusedAdam
 from omegaconf import DictConfig
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch.optim.lr_scheduler import OneCycleLR
+from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, Dataset
+from torch_optimizer import RAdam
 
 from bert_fold.dataset import ProteinNetDataset, prepare_targets
 from bert_fold.dto.batch import ProteinNetBatch
@@ -27,6 +27,7 @@ from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
+from mylib.torch.optim.sched import flat_cos
 
 
 def load_bert_fold(params: ModuleParams) -> BertFold:
@@ -145,16 +146,19 @@ class PLModule(PLBaseModule[BertFold]):
             self.ema_model = create_ema(self.model)
 
     def configure_optimizers(self):
-        opt = FusedAdam(
+        opt = RAdam(
             self.model.parameters(),
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
         )
+        # noinspection PyTypeChecker
         sched = {
-            'scheduler': OneCycleLR(
+            'scheduler': LambdaLR(
                 opt,
-                max_lr=self.hp.lr,
-                total_steps=self.total_steps,
+                lr_lambda=partial(
+                    flat_cos,
+                    total_steps=self.total_steps,
+                ),
             ),
             'interval': 'step',
         }
