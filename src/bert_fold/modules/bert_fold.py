@@ -56,6 +56,8 @@ class BertFold(nn.Module):
         # self.decoder_phi.apply(init_weights)
         # self.decoder_psi.apply(init_weights)
 
+        del self.bert.pooler
+
     def forward(
             self,
             inputs: ProteinNetBatch,

@@ -62,7 +62,7 @@ class ProteinNetDataset(Dataset):
         attention_mask = pad_sequence(attention_mask, batch_first=True)
         # B, N, 3 (xyz)
         R = pad_sequence(R, batch_first=True)
-        evo = pad_sequence(evo, batch_first=True)
+        evo = pad_sequence(evo, batch_first=True).float()
 
         seq_batch = np.concatenate([np.full(len(x), n) for n, x in enumerate(seq_indices)])
         seq_indices = np.concatenate(seq_indices)
@@ -126,7 +126,6 @@ def prepare_targets(raw_targets: ProteinNetBatch) -> BertFoldTargets:
 if __name__ == '__main__':
     # %%
     from const import DATA_PROTEIN_NET_DIR
-    import matplotlib.pyplot as plt
 
     # %%
     df = pd.read_parquet(DATA_PROTEIN_NET_DIR / f'casp12/validation.pqt')
@@ -142,24 +141,4 @@ if __name__ == '__main__':
     batch: ProteinNetBatch = next(iter(loader))
 
     # %%
-    targets = prepare_targets(batch)
-    mask = targets.dist.indices[0] == 0
-    seq_len = batch['attention_mask'][0].sum() - 2
-    idx_i, idx_j = targets.dist.indices[1][mask], targets.dist.indices[2][mask]
-
-    D = np.full((seq_len, seq_len), np.nan)
-    D[idx_i, idx_j] = targets.dist.values[mask].numpy()
-
-    plt.matshow(D)
-    plt.show()
-
-    # %%
-    mask = np.abs(targets.dist.indices[1] - targets.dist.indices[2]) >= 2
-    print(mask.sum())
-
-    plt.hist(np.log(targets.dist.values[mask].numpy().reshape(-1)), bins=100)
-    plt.show()
-
-    # %%
-    print(batch['evo'].shape)
-    print(batch['input_ids'].shape)
+    print(batch['evo'].shape, batch['evo'].dtype)
