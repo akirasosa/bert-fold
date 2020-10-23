@@ -64,7 +64,7 @@ class BertFold(nn.Module):
         x_emb = self.bert.embeddings(inputs['input_ids'])
         x_evo = self.evo_linear(inputs['evo'].type_as(x_emb))
         x = x_emb + x_evo
-        extended_attention_mask: torch.Tensor = self.bert.get_extended_attention_mask(
+        extended_attention_mask = self.bert.get_extended_attention_mask(
             inputs['attention_mask'],
             inputs['input_ids'].shape,
             inputs['input_ids'].device,

@@ -113,8 +113,6 @@ def prepare_targets(raw_targets: ProteinNetBatch) -> BertFoldTargets:
         dist=dist,
         phi=Targets(
             indices=raw_targets['seq_indices'],
-            # TODO
-            # indices=(raw_targets['seq_indices'][0], raw_targets['seq_indices'][1] + 1),
             values=raw_targets['phi'],
         ),
         psi=Targets(
