@@ -12,8 +12,13 @@ from const import DATA_PROTEIN_NET_DIR
 
 def load_model() -> BertFold:
     model = BertFold(pretrained=False)
+
     # Update here for your trained weight.
-    ckpt = torch.load('../experiments/protein_supervised/1599530879/checkpoints/last.ckpt')
+    # ProtBert, seq only
+    # ckpt = torch.load('../experiments/protein_supervised/1599530879/checkpoints/last.ckpt')
+
+    # ProtBert-BFD, seq and evo
+    ckpt = torch.load('/mnt/ssdnfs/vfa-ruby/akirasosa/experiments/bert_fold/1603422208/checkpoints/last.ckpt')
 
     if any(k.startswith('ema_model') for k in ckpt['state_dict'].keys()):
         prefix = 'ema_model'
@@ -36,7 +41,7 @@ def load_model() -> BertFold:
 # %%
 if __name__ == '__main__':
     # %%
-    df = pd.read_parquet(DATA_PROTEIN_NET_DIR / 'casp12/validation.pqt')
+    df = pd.read_parquet(DATA_PROTEIN_NET_DIR / 'casp12/testing.pqt')
     dataset = ProteinNetDataset(df)
 
     # %%
@@ -51,7 +56,7 @@ if __name__ == '__main__':
     print(pdb_id[3:7])
 
     with torch.no_grad():
-        out = model.forward(batch['input_ids'], batch['attention_mask'], targets)
+        out = model.forward(batch, targets)
 
     # %%
     seq_len = len(data[0]) - 2
