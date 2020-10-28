@@ -26,6 +26,11 @@ python run_train.py params/001.yaml
 
 Once finishing train the model, predicted distance map is available by using the [visualization script](./src/vis_contacts.py)
 
+| Model       | Val           | Test  |
+| ------------- |:-------------:| -----:|
+| ProtBert (seq only)      | 4.855 | 7.027 |
+| ProtBert-BFD (seq and evolutionary)      | 4.480      |   6.127 |
+
 ![1ZU4](images/1ZU4.jpg)
 
 ## Credits

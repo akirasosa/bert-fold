@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from functools import cached_property, partial
+from functools import cached_property
 from logging import getLogger, FileHandler
 from multiprocessing import cpu_count
 from pathlib import Path
@@ -14,7 +14,6 @@ from omegaconf import DictConfig
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DataLoader, Dataset
 from torch_optimizer import RAdam
 
@@ -27,7 +26,6 @@ from const import DATA_PROTEIN_NET_DIR
 from mylib.pytorch_lightning.base_module import PLBaseModule
 from mylib.pytorch_lightning.logging import configure_logging
 from mylib.torch.ensemble.ema import create_ema
-from mylib.torch.optim.sched import flat_cos
 
 
 def load_bert_fold(params: ModuleParams) -> BertFold:
@@ -151,19 +149,7 @@ class PLModule(PLBaseModule[BertFold]):
             lr=self.hp.lr,
             weight_decay=self.hp.weight_decay,
         )
-        # noinspection PyTypeChecker
-        sched = {
-            'scheduler': LambdaLR(
-                opt,
-                lr_lambda=partial(
-                    flat_cos,
-                    total_steps=self.total_steps,
-                ),
-            ),
-            'interval': 'step',
-        }
-
-        return [opt], [sched]
+        return [opt]
 
     def step(self, model: BertFold, batch: ProteinNetBatch) -> StepResult:
         targets = prepare_targets(batch)
@@ -224,11 +210,6 @@ def train(params: Params):
         amp_backend='apex',
         resume_from_checkpoint=params.t.resume_from_checkpoint,
         weights_save_path=params.t.weights_save_path,
-        # early_stop_callback=EarlyStopping(
-        #     monitor='ema_0_loss' if params.m.use_ema else 'val_0_loss',
-        #     patience=30,
-        #     mode='min'
-        # ),
         checkpoint_callback=ModelCheckpoint(
             monitor='ema_0_loss' if params.m.use_ema else 'val_0_loss',
             save_last=True,
